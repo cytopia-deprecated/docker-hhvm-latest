@@ -194,7 +194,7 @@ script:
   ## 04.) [a](DEBUG) Custom configuration
   ################################################################################
   - /tmp/section.sh "04.) [a](DEBUG) Custom configuration"
-  - printf "[PHP]\n%s\n" "hhvm.server.upload.upload_max_file_size = 2048M" > ${MY_CONFIG_DIR}/custom.ini
+  - printf "[PHP]\n%s\n" "upload_max_file_size = 2048M" > ${MY_CONFIG_DIR}/custom.ini
 
   - docker run
       -v ${MY_CONFIG_DIR}:/etc/php-custom.d
@@ -213,7 +213,7 @@ script:
   ## 04.) [b](SILENT) Custom configuration
   ##
   - /tmp/section.sh "04.) [b](SILENT) Custom configuration"
-  - printf "[PHP]\n%s\n" "hhvm.server.upload.upload_max_file_size = 2048M" > ${MY_CONFIG_DIR}/custom.ini
+  - printf "[PHP]\n%s\n" "upload_max_file_size = 2048M" > ${MY_CONFIG_DIR}/custom.ini
 
   - docker run
       -v ${MY_CONFIG_DIR}:/etc/php-custom.d
