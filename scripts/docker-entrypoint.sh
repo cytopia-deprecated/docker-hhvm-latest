@@ -1,0 +1,496 @@
+#!/bin/sh -eu
+
+###
+### Variables
+###
+DEBUG_COMMANDS=0
+
+# If $PHP_CUST_CONF_DIR is mounted from the
+# host, all *.ini files from $PHP_CUST_CONF_DIR
+# will be copied to $PHP_CONF_DIR
+PHP_CONF_DIR="/etc/php.d"				# Default php config dir
+PHP_CUST_CONF_DIR="/etc/php-custom.d"	# Custom php directory to look for *.ini files
+
+PHP_XDEBUG_DEFAULT_PORT="9000"
+
+
+
+###
+### Functions
+###
+run() {
+	_cmd="${1}"
+	_debug="0"
+
+	_red="\033[0;31m"
+	_green="\033[0;32m"
+	_reset="\033[0m"
+	_user="$(whoami)"
+
+
+	# If 2nd argument is set and enabled, allow debug command
+	if [ "${#}" = "2" ]; then
+		if [ "${2}" = "1" ]; then
+			_debug="1"
+		fi
+	fi
+
+
+	if [ "${DEBUG_COMMANDS}" = "1" ] || [ "${_debug}" = "1" ]; then
+		printf "${_red}%s \$ ${_green}${_cmd}${_reset}\n" "${_user}"
+	fi
+	sh -c "LANG=C LC_ALL=C ${_cmd}"
+}
+
+log() {
+	_lvl="${1}"
+	_msg="${2}"
+
+	_clr_ok="\033[0;32m"
+	_clr_info="\033[0;34m"
+	_clr_warn="\033[0;33m"
+	_clr_err="\033[0;31m"
+	_clr_rst="\033[0m"
+
+	if [ "${_lvl}" = "ok" ]; then
+		printf "${_clr_ok}[OK]   %s${_clr_rst}\n" "${_msg}"
+	elif [ "${_lvl}" = "info" ]; then
+		printf "${_clr_info}[INFO] %s${_clr_rst}\n" "${_msg}"
+	elif [ "${_lvl}" = "warn" ]; then
+		printf "${_clr_warn}[WARN] %s${_clr_rst}\n" "${_msg}" 1>&2	# stdout -> stderr
+	elif [ "${_lvl}" = "err" ]; then
+		printf "${_clr_err}[ERR]  %s${_clr_rst}\n" "${_msg}" 1>&2	# stdout -> stderr
+	else
+		printf "${_clr_err}[???]  %s${_clr_rst}\n" "${_msg}" 1>&2	# stdout -> stderr
+	fi
+}
+
+# Test if argument is an integer.
+#
+# @param  mixed
+# @return integer	0: is number | 1: not a number
+isint(){
+	printf "%d" "${1}" >/dev/null 2>&1 && return 0 || return 1;
+}
+
+
+
+
+################################################################################
+# BOOTSTRAP
+################################################################################
+
+if set | grep '^DEBUG_COMPOSE_ENTRYPOINT='  >/dev/null 2>&1; then
+	if [ "${DEBUG_COMPOSE_ENTRYPOINT}" = "1" ]; then
+		DEBUG_COMMANDS=1
+	fi
+fi
+
+
+################################################################################
+# MAIN ENTRY POINT
+################################################################################
+
+
+
+###
+### Use docker logs [error]?
+###
+
+if ! set | grep '^DOCKER_LOGS_ERROR=' >/dev/null 2>&1; then
+	log "warn" "\$DOCKER_LOGS_ERROR not set."
+	log "warn" "Logging errors to file inside container"
+else
+	# ---- 1/3 Enabled ----
+	if [ "${DOCKER_LOGS_ERROR}" = "1" ]; then
+		log "info" "Logging errors to docker logs"
+
+		run "ln -sf /proc/self/fd/2 ${HHVM_LOG}"
+
+	# ---- 2/3 Disabled
+	elif [ "${DOCKER_LOGS_ERROR}" = "0" ]; then
+		log "info" "Not logging errors to docker logs, using file inside container"
+
+		if [ -L "${HHVM_LOG}" ]; then
+			run "rm -f ${HHVM_LOG}"
+			run "touch ${HHVM_LOG}"
+			run "chmod 0666 ${HHVM_LOG}"
+		fi
+
+	# ---- 3/3 Wrong value ----
+	else
+		log "err" "Invalid value for \$DOCKER_LOGS_ERROR: ${DOCKER_LOGS_ERROR}"
+		log "err" "Must be '1' (for On) or '0' (for Off)"
+		exit 1
+	fi
+fi
+
+
+
+####
+#### Use docker logs [access]?
+####
+#
+#if ! set | grep '^DOCKER_LOGS_ACCESS=' >/dev/null 2>&1; then
+#	log "warn" "\$DOCKER_LOGS_ACCESS not set."
+#	log "warn" "Logging access to file inside container"
+#else
+#	# ---- 1/3 Enabled ----
+#	if [ "${DOCKER_LOGS_ACCESS}" = "1" ]; then
+#		log "info" "Logging access to docker logs"
+#
+#		run "ln -sf /proc/self/fd/2 ${PHP_FPM_POOL_LOG_ACC}"
+#
+#	# ---- 2/3 Disabled
+#	elif [ "${DOCKER_LOGS_ACCESS }" = "0" ]; then
+#		log "info" "Not logging access to docker logs, using file inside container"
+#
+#		if [ -L "${PHP_POOL_LOG_ACC}" ]; then
+#			run "rm -f ${PHP_POOL_LOG_ACC}"
+#			run "touch ${PHP_POOL_LOG_ACC}"
+#			run "chmod 0666 ${PHP_POOL_LOG_ACC}"
+#		fi
+#
+#	# ---- 3/3 Wrong value ----
+#	else
+#		log "err" "Invalid value for \$DOCKER_LOGS_ACCESS: ${DOCKER_LOGS_ACCESS}"
+#		log "err" "Must be '1' (for On) or '0' (for Off)"
+#		exit 1
+#	fi
+#fi
+#
+#
+#
+###
+### Use docker logs [xdebug]?
+###
+
+if ! set | grep '^DOCKER_LOGS_XDEBUG=' >/dev/null 2>&1; then
+	log "warn" "\$DOCKER_LOGS_XDEBUGnot set."
+	log "warn" "Logging xdebug to file inside container"
+else
+	# ---- 1/3 Enabled ----
+	if [ "${DOCKER_LOGS_XDEBUG}" = "1" ]; then
+		log "info" "Logging xdebug to docker logs"
+
+		run "ln -sf /proc/self/fd/2 ${PHP_LOG_XDEBUG}"
+
+	# ---- 2/3 Disabled
+	elif [ "${DOCKER_LOGS_XDEBUG}" = "0" ]; then
+		log "info" "Not logging xdebug to docker logs, using file inside container"
+
+		if [ -L "${PHP_LOG_XDEBUG}" ]; then
+			run "rm -f ${PHP_LOG_XDEBUG}"
+			run "touch ${PHP_LOG_XDEBUG}"
+			run "chmod 0666 ${PHP_LOG_XDEBUG}"
+		fi
+
+	# ---- 3/3 Wrong value ----
+	else
+		log "err" "Invalid value for \$DOCKER_LOGS_XDEBUG: ${DOCKER_LOGS_XDEBUG}"
+		log "err" "Must be '1' (for On) or '0' (for Off)"
+		exit 1
+	fi
+fi
+
+
+
+###
+### Adjust timezone
+###
+
+if ! set | grep '^TIMEZONE='  >/dev/null 2>&1; then
+	log "warn" "\$TIMEZONE not set."
+	log "warn" "Setting PHP: timezone=UTC"
+	run "sed -i'' 's|;*date.timezone[[:space:]]*=.*$|date.timezone = UTC|g' /etc/hhvm/php.ini"
+else
+	if [ -f "/usr/share/zoneinfo/${TIMEZONE}" ]; then
+		# Unix Time
+		log "info" "Setting docker timezone to: ${TIMEZONE}"
+		run "rm /etc/localtime"
+		run "ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
+
+		# PHP Time
+		log "info" "Setting PHP: timezone=${TIMEZONE}"
+		run "sed -i'' 's|;*date.timezone[[:space:]]*=.*$|date.timezone = ${TIMEZONE}|g' /etc/hhvm/php.ini"
+	else
+		log "err" "Invalid timezone for \$TIMEZONE."
+		log "err" "\$TIMEZONE: '${TIMEZONE}' does not exist."
+		exit 1
+	fi
+fi
+log "info" "Docker date set to: $(date)"
+
+
+
+###
+### Custom PHP config
+###
+
+log "info" "Adding custom configuration files:"
+
+if [ ! -d "${PHP_CONF_DIR}" ]; then
+	run "mkdir -p ${PHP_CONF_DIR}"
+fi
+if [ ! -d "${PHP_CUST_CONF_DIR}" ]; then
+	run "mkdir -p ${PHP_CUST_CONF_DIR}"
+fi
+
+run "find ${PHP_CUST_CONF_DIR} -type f -iname \"*.ini\" -exec echo \"Copying: {} to ${PHP_CONF_DIR}/\" \; -exec cp \"{}\" ${PHP_CONF_DIR}/ \;"
+run "find ${PHP_CONF_DIR} -name '*.ini' -exec chmod 0644 {} \;"
+
+NEW_CONFIGS=""
+NEW_FILES="$( ls ${PHP_CUST_CONF_DIR}/*.ini 2>/dev/null || true )"
+for i in ${NEW_FILES}; do
+	NEW_CONFIGS="${NEW_CONFIGS} --config=${i}"
+done
+
+run "sed -i'' 's|--config=/etc/hhvm/php.ini|--config=/etc/hhvm/php.ini ${NEW_CONFIGS}|g' /etc/supervisor/supervisord.conf"
+
+
+
+
+###
+### PHP Xdebug
+###
+
+if ! set | grep '^PHP_XDEBUG_ENABLE=' >/dev/null 2>&1; then
+	log "warn" "\$PHP_XDEBUG_ENABLE not set. Not enabling Xdebug"
+
+else
+	# ---- 1/3 Enabled ----
+	if [ "${PHP_XDEBUG_ENABLE}" = "1" ]; then
+
+		# 1.1 Check Xdebug Port
+		if ! set | grep '^PHP_XDEBUG_REMOTE_PORT=' >/dev/null 2>&1; then
+			log "warn" "\$PHP_XDEBUG_REMOTE_PORT not set, defaulting to ${PHP_XDEBUG_DEFAULT_PORT}"
+			PHP_XDEBUG_REMOTE_PORT="${PHP_XDEBUG_DEFAULT_PORT}"
+
+		elif ! isint "${PHP_XDEBUG_REMOTE_PORT}"; then
+			log "warn" "\$PHP_XDEBUG_REMOTE_PORT is not a valid integer: ${PHP_XDEBUG_REMOTE_PORT}"
+			log "warn" "\Defaulting to ${PHP_XDEBUG_DEFAULT_PORT}"
+			PHP_XDEBUG_REMOTE_PORT="${PHP_XDEBUG_DEFAULT_PORT}"
+
+		elif [ "${PHP_XDEBUG_REMOTE_PORT}" -lt "1" ] || [ "${PHP_XDEBUG_REMOTE_PORT}" -gt "65535" ]; then
+			log "warn" "\$PHP_XDEBUG_REMOTE_PORT is out of range: ${PHP_XDEBUG_REMOTE_PORT}"
+			log "warn" "\Defaulting to ${PHP_XDEBUG_DEFAULT_PORT}"
+			PHP_XDEBUG_REMOTE_PORT="${PHP_XDEBUG_DEFAULT_PORT}"
+		fi
+
+		# 1.2 Check Xdebug remote Host (IP address of Docker Host [your computer])
+		if ! set | grep '^PHP_XDEBUG_REMOTE_HOST=' >/dev/null 2>&1; then
+			log "err" "\$PHP_XDEBUG_REMOTE_HOST not set, but required."
+			log "err" "\$PHP_XDEBUG_REMOTE_HOST should be the IP of your Host with the IDE to which xdebug can connect."
+			exit 1
+		fi
+
+		# 1.4 Enable Xdebug
+		log "info" "Setting PHP: xdebug.enable=1"
+		run "echo 'xdebug.enable=1' >> /etc/hhvm/php.ini"
+
+		log "info" "Setting PHP: xdebug.remote_enable=1"
+		run "echo 'xdebug.remote_enable=1' >> /etc/hhvm/php.ini"
+
+		log "info" "Setting PHP: xdebug.remote_connect_back=0"
+		run "echo 'xdebug.remote_connect_back=0' >> /etc/hhvm/php.ini"
+
+		log "info" "Setting PHP: xdebug.remote_port=${PHP_XDEBUG_REMOTE_PORT}"
+		run "echo 'xdebug.remote_port=${PHP_XDEBUG_REMOTE_PORT}' >> /etc/hhvm/php.ini"
+
+		# shellcheck disable=SC2153
+		log "info" "Setting PHP: xdebug.remote_host=${PHP_XDEBUG_REMOTE_HOST}"
+		run "echo 'xdebug.remote_host=${PHP_XDEBUG_REMOTE_HOST}' >> /etc/hhvm/php.ini"
+
+		log "info" "Setting PHP: xdebug.remote_log=\"${PHP_LOG_XDEBUG}\""
+		run "echo 'xdebug.remote_log=\"${PHP_LOG_XDEBUG}\"' >> /etc/hhvm/php.ini"
+
+
+	# ---- 2/3 Disabled ----
+	elif [ "${PHP_XDEBUG_ENABLE}" = "0" ]; then
+		log "info" "Disabling Xdebug"
+		run "rm -f ${XDEBUG_CONFIG}"
+
+
+	# ---- 3/3 Wrong value ----
+	else
+		log "err" "Invalid value for \$PHP_XDEBUG_ENABLE: ${PHP_XDEBUG_ENABLE}"
+		log "err" "Must be '1' (for On) or '0' (for Off)"
+		exit 1
+	fi
+
+fi
+
+
+
+###
+### Forward remote MySQL port to 127.0.0.1 ?
+###
+if ! set | grep '^FORWARD_MYSQL_PORT_TO_LOCALHOST=' >/dev/null 2>&1; then
+	log "warn" "\$FORWARD_MYSQL_PORT_TO_LOCALHOST not set."
+	log "warn" "Not forwading MySQL port to 127.0.0.1 inside docker"
+else
+
+	if [ "${FORWARD_MYSQL_PORT_TO_LOCALHOST}" = "1" ]; then
+		if ! set | grep '^MYSQL_REMOTE_ADDR=' >/dev/null 2>&1; then
+			log "err" "You have enabled to port-forward database port to 127.0.0.1."
+			log "err" "\$MYSQL_REMOTE_ADDR must be set for this to work."
+			exit 1
+		fi
+		if ! set | grep '^MYSQL_REMOTE_PORT=' >/dev/null 2>&1; then
+			log "err" "You have enabled to port-forward database port to 127.0.0.1."
+			log "err" "\$MYSQL_REMOTE_PORT must be set for this to work."
+			exit 1
+		fi
+		if ! set | grep '^MYSQL_LOCAL_PORT=' >/dev/null 2>&1; then
+			log "err" "You have enabled to port-forward database port to 127.0.0.1."
+			log "err" "\$MYSQL_LOCAL_PORT must be set for this to work."
+			exit 1
+		fi
+
+		##
+		## Start socat tunnel
+		## bring mysql to localhost
+		##
+		## This allos to connect via mysql -h 127.0.0.1
+		##
+		log "info" "Forwarding $MYSQL_REMOTE_ADDR:$MYSQL_REMOTE_PORT to 127.0.0.1:${MYSQL_LOCAL_PORT} inside this docker."
+		run "/usr/bin/socat tcp-listen:${MYSQL_LOCAL_PORT},reuseaddr,fork tcp:$MYSQL_REMOTE_ADDR:$MYSQL_REMOTE_PORT &"
+
+	elif [ "${FORWARD_MYSQL_PORT_TO_LOCALHOST}" = "0" ]; then
+		log "info" "Not forwading MySQL port to 127.0.0.1 inside docker"
+
+	else
+		log "err" "Invalid value for \$FORWARD_MYSQL_PORT_TO_LOCALHOST"
+		log "err" "Only 1 (for on) or 0 (for off) are allowed"
+		exit 1
+	fi
+fi
+
+
+
+###
+### Mount remote MySQL socket volume to local disk?
+###
+if ! set | grep '^MOUNT_MYSQL_SOCKET_TO_LOCALDISK=' >/dev/null 2>&1; then
+	log "warn" "\$MOUNT_MYSQL_SOCKET_TO_LOCALDISK not set."
+	log "warn" "Not mounting MySQL socket inside docker."
+else
+	if [ "${MOUNT_MYSQL_SOCKET_TO_LOCALDISK}" = "1" ]; then
+		if ! set | grep '^MYSQL_SOCKET_PATH=' >/dev/null 2>&1; then
+			log "err" "You have enabled to mount mysql socket to local disk."
+			log "err" "\$MYSQL_SOCKET_PATH must be set for this to work."
+			exit 1
+		fi
+
+		##
+		## Tell MySQL Client where the socket can be found.
+		##
+		## This allos to connect via mysql -h localhost
+		##
+		log "info" "Setting MySQL client config: socket=${MYSQL_SOCKET_PATH}"
+
+		run "echo '[client]'						> /etc/my.cnf"
+		run "echo 'socket = ${MYSQL_SOCKET_PATH}'	>> /etc/my.cnf"
+
+		run "echo '[mysql]'							>> /etc/my.cnf"
+		run "echo 'socket = ${MYSQL_SOCKET_PATH}'	>> /etc/my.cnf"
+
+
+
+		##
+		## Tell PHP where the socket can be found.
+		##
+		## This allos to connect via mysql -h localhost
+		##
+		log "info" "Setting PHP: hhvm.mysql.socket=${MYSQL_SOCKET_PATH}"
+		run "sed -i'' 's|hhvm.mysql.socket.*$||g' /etc/hhvm/php.ini"
+		run "echo 'hhvm.mysql.socket = ${MYSQL_SOCKET_PATH}' >> /etc/hhvm/php.ini"
+
+		log "info" "Setting PHP: mysqli.default_socket=${MYSQL_SOCKET_PATH}"
+		run "sed -i'' 's|mysqli.default_socket.*$||g' /etc/hhvm/php.ini"
+		run "echo 'mysqli.default_socket = ${MYSQL_SOCKET_PATH}' >> /etc/hhvm/php.ini"
+
+		log "info" "Setting PHP: pdo_mysql.default_socket=${MYSQL_SOCKET_PATH}"
+		run "sed -i'' 's|pdo_mysql.default_socket.*$||g' /etc/hhvm/php.ini"
+		run "echo 'pdo_mysql.default_socket = ${MYSQL_SOCKET_PATH}' >> /etc/hhvm/php.ini"
+
+	elif [ "${MOUNT_MYSQL_SOCKET_TO_LOCALDISK}" = "0" ]; then
+		log "info" "Not mounting MySQL socket inside docker."
+
+	else
+		log "err" "Invalid value for \$MOUNT_MYSQL_SOCKET_TO_LOCALDISK"
+		log "err" "Only 1 (for on) or 0 (for off) are allowed"
+		exit 1
+	fi
+fi
+
+
+
+###
+### Allow for sending emails
+###
+if ! set | grep '^ENABLE_MAIL=' >/dev/null 2>&1; then
+	log "warn" "\$ENABLE_MAIL not set."
+	log "warn" "Disabling sending of emails."
+else
+	if [ "${ENABLE_MAIL}" = "1" ]; then
+
+		log "info" "Enabling sending of emails."
+
+		MAIL_USER="mailtrap"
+
+		##
+		## 1. User configuration
+		##
+
+		# Add user if it does not exist
+		if ! id -u "${MAIL_USER}" > /dev/null 2>&1; then
+			run "useradd ${MAIL_USER}"
+		fi
+
+		# Add Mail file if it does not exist
+		if [ ! -f "/var/mail/${MAIL_USER}" ]; then
+			run "touch /var/mail/${MAIL_USER}"
+		fi
+
+		# Open mail user permissions
+		run "chmod 0666 /var/mail/${MAIL_USER}"
+		run "chown ${MAIL_USER}:${MAIL_USER} /var/mail/${MAIL_USER}"
+
+
+
+		##
+		## 2. Postfix configuration
+		##
+		run "sed -i'' 's/^inet_protocols.*/inet_protocols = ipv4/g' /etc/postfix/main.cf"
+		run "echo 'virtual_alias_maps = pcre:/etc/postfix/virtual' >> /etc/postfix/main.cf"
+		run "echo '/.*@.*/ ${MAIL_USER}' >> /etc/postfix/virtual"
+		run "newaliases"
+		run "postfix start"
+
+
+	elif [ "${ENABLE_MAIL}" = "0" ]; then
+		log "info" "Disabling sending of emails."
+
+	else
+		log "err" "Invalid value for \$ENABLE_MAIL"
+		log "err" "Only 1 (for on) or 0 (for off) are allowed"
+		exit 1
+	fi
+fi
+
+
+
+###
+### Fix logdir/file
+###
+run "chmod 0777 ${HHVM_LOG_DIR}"
+run "find ${HHVM_LOG_DIR} -type f -exec chmod 0666 {} \;"
+
+
+
+###
+### Start
+###
+log "info" "Starting $( hhvm --version 2>/dev/null | grep HipHop ) via supervisord ($( supervisord -v ))"
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

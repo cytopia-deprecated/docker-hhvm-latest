@@ -1,0 +1,132 @@
+# HHVM latest Docker
+
+<small>**Latest build:** 2017-04-19</small>
+
+[![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
+
+[![cytopia/hhvm-latest](http://dockeri.co/image/cytopia/hhvm-latest)](https://hub.docker.com/r/cytopia/hhvm-latest/)
+
+**[php-fpm 5.4](https://github.com/cytopia/docker-php-fpm-5.4) | [php-fpm 5.5](https://github.com/cytopia/docker-php-fpm-5.5) | [php-fpm 5.6](https://github.com/cytopia/docker-php-fpm-5.6) | [php-fpm 7.0](https://github.com/cytopia/docker-php-fpm-7.0) | [php-fpm 7.1](https://github.com/cytopia/docker-php-fpm-7.1) | hhvm-latest**
+
+----
+
+**HHVM latest Docker on Ubuntu**
+
+[![Devilbox](https://raw.githubusercontent.com/cytopia/devilbox/master/.devilbox/www/htdocs/assets/img/devilbox_80.png)](https://github.com/cytopia/devilbox)
+
+<sub>This docker image is part of the **[devilbox](https://github.com/cytopia/devilbox)**</sub>
+
+----
+
+## Options
+
+### Environmental variables
+
+#### Required environmental variables
+
+- None
+
+#### Optional environmental variables
+
+| Variable | Type | Default |Description |
+|----------|------|---------|------------|
+| DEBUG_COMPOSE_ENTRYPOINT | bool | `0` | Show shell commands executed during start.<br/>Value: `0` or `1` |
+| DOCKER_LOGS_ERROR | bool | `0` | Log errors to `docker logs` instead of file inside container.<br/>Value: `0` or `1` |
+| DOCKER_LOGS_XDEBUG | bool | `0` | Log php xdebug to `docker logs` instead of file inside container.<br/>Value: `0` or `1` |
+| TIMEZONE | string | `UTC` | Set docker OS timezone as well as PHP timezone.<br/>(Example: `Europe/Berlin`) |
+| ENABLE_MAIL | bool | `0` | Allow sending emails. Postfix will be configured for local delivery and all sent mails (even to real domains) will be catched locally. No email will ever go out. They will all be stored in a local `mailtrap` account.<br/>Value: `0` or `1` |
+| FORWARD_MYSQL_PORT_TO_LOCALHOST | bool | `0` | Forward a remote MySQL server port to listen on this docker on `127.0.0.1`<br/>Value: `0` or `1` |
+| MYSQL_REMOTE_ADDR | string | `` | The remote IP address of the MySQL host from which to port-forward.<br/>This is required if $FORWARD_MYSQL_PORT_TO_LOCALHOST is turned on. |
+| MYSQL_REMOTE_PORT | int | `` | The remote port of the MySQL host from which to port-forward.<br/>This is required if $FORWARD_MYSQL_PORT_TO_LOCALHOST is turned on. |
+| MYSQL_LOCAL_PORT | int | `` | Forward the MySQL port to `127.0.0.1` to the specified local port.<br/>This is required if $FORWARD_MYSQL_PORT_TO_LOCALHOST is turned on. |
+| MOUNT_MYSQL_SOCKET_TO_LOCALDISK | bool | `0` | Mount a remote MySQL server socket to local disk on this docker.<br/>Value: `0` or `1` |
+| MYSQL_SOCKET_PATH | string | `` | Full socket path where the MySQL socket has been mounted on this docker.<br/>This is recommended to adjust if $MOUNT_MYSQL_SOCKET_TO_LOCALDISK is turned on.<br/><br/>Example: `/tmp/mysql/mysqld.sock` |
+| PHP_XDEBUG_ENABLE | bool | `0` | Enable Xdebug.<br/>Value: `0` or `1` |
+| PHP_XDEBUG_REMOTE_PORT | int | `9000` | The port on your Host (where you run the IDE/editor to which xdebug should connect.) |
+| PHP_XDEBUG_REMOTE_HOST | string | `` | The IP address of your Host (where you run the IDE/editor to which xdebug should connect).<br/>This is required if $PHP_DEBUG_ENABLE is turned on. |
+
+### Default mount points
+
+| Docker | Description |
+|--------|-------------|
+| /var/log/php-fpm | HHVM log dir |
+| /etc/php-custom.d | Custom user configuration files. Make sure to mount this folder to your host, where you have custom `*.ini` files. These files will then be copied to `/etc/php.d` during startup. |
+| /var/mail | Mail mbox directory |
+
+### Default ports
+
+| Docker | Description |
+|--------|-------------|
+| 9000   | HHVM listening Port |
+
+## Usage
+
+It is recommended to always use the `$TIMEZONE` variable which will set php's `date.timezone`.
+
+**1. Provide FPM port to host**
+```bash
+$ docker run -i \
+    -p 127.0.0.1:9000:9000 \
+    -e TIMEZONE=Europe/Berlin \
+    -t cytopia/hhvm-latest
+```
+
+**2. Overwrite php.ini settings**
+
+Mount a PHP config directory from your host into the PHP docker in order to overwrite php.ini settings.
+```bash
+$ docker run -i \
+    -v ~/.etc/php.d:/etc/php-custom.d \
+    -p 127.0.0.1:9000:9000 \
+    -e TIMEZONE=Europe/Berlin \
+    -t cytopia/hhvm-latest
+```
+
+
+**3. MySQL connect via localhost (via socket mount)**
+
+Mount a MySQL socket from `~/run/mysqld` (on your host) into the PHP docker.
+By this, your PHP files inside the docker can use `localhost` to connect to a MySQL database.
+
+Note that the `$MYSQL_SOCKET_PATH` (path to file) should match with the folder you mount into the docker.
+```bash
+$ docker run -i \
+    -v ~/run/mysqld:/var/run/mysqld \
+    -p 127.0.0.1:9000:9000 \
+    -e TIMEZONE=Europe/Berlin \
+    -e MOUNT_MYSQL_SOCKET_TO_LOCALDISK=1 \
+    -e MYSQL_SOCKET_PATH=/var/run/mysqld/mysqld.sock \
+    -t cytopia/hhvm-latest
+```
+
+**4. MySQL connect via 127.0.0.1 (via port-forward)**
+
+Forward MySQL Port from `172.168.0.30` (or any other IP address/hostname) and Port `3306` to the PHP docker on `127.0.0.1:3306`. By this, your PHP files inside the docker can use `127.0.0.1` to connect to a MySQL database.
+```bash
+$ docker run -i \
+    -p 127.0.0.1:9000:9000 \
+    -e TIMEZONE=Europe/Berlin \
+    -e FORWARD_MYSQL_PORT_TO_LOCALHOST=1 \
+    -e MYSQL_REMOTE_ADDR=172.168.0.30 \
+    -e MYSQL_REMOTE_PORT=3306 \
+    -e MYSQL_LOCAL_PORT=3306 \
+    -t cytopia/hhvm-latest
+```
+
+**5. Launch Postfix for mail-catching**
+
+Once you `$ENABLE_MAIL=1`, all mails sent via any of your PHP applications no matter to which domain, are catched locally into the `mailtrap` account. You can also mount the mail directory locally to hook in with `mutt` and read those mails.
+```bash
+$ docker run -i \
+    -p 127.0.0.1:9000:9000 \
+    -v /tmp/mail:/var/mail \
+    -e TIMEZONE=Europe/Berlin \
+    -e ENABLE_MAIL=1 \
+    -t cytopia/hhvm-latest
+```
+
+## Modules
+
+**[Version]**
+
+HipHop VM 3.19.1 (rel)
