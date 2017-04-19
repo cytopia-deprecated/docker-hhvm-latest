@@ -205,6 +205,7 @@ script:
 
   # Test custom configuration
   - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'upload_max_filesize' | grep '2048'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'upload_max_filesize'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
