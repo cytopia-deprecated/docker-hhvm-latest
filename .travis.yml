@@ -79,11 +79,11 @@ script:
   - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'hhvm'
 
   # Xdebug should be off
-  - if docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
   # Socat should not be running?
-  - if docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
+  - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
   # No Custom Configuration (For this Round)
-  #- if docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
+  #- docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
   # Check Timezone
   - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'UTC'
 
@@ -104,13 +104,13 @@ script:
   - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'hhvm'
 
   # Xdebug should be off
-  - if docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
   # Socat should not be running?
-  - if docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
+  - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
   # No Custom Configuration (For this Round)
-  #- if docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
+  #- docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
   # Check Timezone
-  - docker exec ${MY_DOCKER_NAME} hhvm --php-r "printf(\"%s\n\", ini_get('date.timezone'));" 2>/dev/null | grep 'UTC'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'UTC'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -128,7 +128,7 @@ script:
   - docker ps
 
   # Check Timezone
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('date.timezone'));" 2>/dev/null | grep 'Europe/Berlin'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'Europe/Berlin'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -143,7 +143,7 @@ script:
   - docker ps
 
   # Check Timezone
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('date.timezone'));" 2>/dev/null | grep 'Europe/Berlin'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'Europe/Berlin'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -163,9 +163,9 @@ script:
 
   # Check Xdebug Checks
   #- docker exec ${MY_DOCKER_NAME} php -m | grep 'xdebug'
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('xdebug.enable'));" 2>/dev/null | grep '1'
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('xdebug.remote_host'));" 2>/dev/null | grep '127.0.0.1'
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('xdebug.remote_port'));" 2>/dev/null | grep '9000'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable' | grep '1'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.remote_host' | grep '127.0.0.1'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.remote_port' | grep '9000'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -182,9 +182,9 @@ script:
 
   # Check Xdebug Checks
   #- docker exec ${MY_DOCKER_NAME} php -m | grep 'xdebug'
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('xdebug.enable'));" 2>/dev/null | grep '1'
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('xdebug.remote_host'));" 2>/dev/null | grep '127.0.0.1'
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('xdebug.remote_port'));" 2>/dev/null | grep '9000'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable' | grep '1'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.remote_host' | grep '127.0.0.1'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.remote_port' | grep '9000'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -204,7 +204,7 @@ script:
   - docker ps
 
   # Test custom configuration
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('upload_max_filesize'));" 2>/dev/null | grep '2048'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'upload_max_filesize' | grep '2048'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -221,7 +221,7 @@ script:
   - docker ps
 
   # Test custom configuration
-  - docker exec ${MY_DOCKER_NAME} hhvm --php -r "printf(\"%s\n\", ini_get('upload_max_filesize'));" 2>/dev/null | grep '2048'
+  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'upload_max_filesize' | grep '2048'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
