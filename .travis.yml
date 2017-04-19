@@ -194,7 +194,7 @@ script:
   ## 04.) [a](DEBUG) Custom configuration
   ################################################################################
   - /tmp/section.sh "04.) [a](DEBUG) Custom configuration"
-  - printf "[PHP]\n%s\n" "upload_max_filesize = 2048M" > ${MY_CONFIG_DIR}/custom.ini
+  - printf "[PHP]\n%s\n" "hhvm.server.upload.upload_max_file_size = 2048M" > ${MY_CONFIG_DIR}/custom.ini
 
   - docker run
       -v ${MY_CONFIG_DIR}:/etc/php-custom.d
@@ -205,7 +205,6 @@ script:
 
   # Test custom configuration
   - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'upload_max_filesize' | grep '2048'
-  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'upload_max_filesize'
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -213,7 +212,7 @@ script:
   ## 04.) [b](SILENT) Custom configuration
   ##
   - /tmp/section.sh "04.) [b](SILENT) Custom configuration"
-  - printf "[PHP]\n%s\n" "upload_max_filesize = 2048M" > ${MY_CONFIG_DIR}/custom.ini
+  - printf "[PHP]\n%s\n" "hhvm.server.upload.upload_max_file_size = 2048M" > ${MY_CONFIG_DIR}/custom.ini
 
   - docker run
       -v ${MY_CONFIG_DIR}:/etc/php-custom.d
