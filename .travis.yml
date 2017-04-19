@@ -79,11 +79,11 @@ script:
   - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'hhvm'
 
   # Xdebug should be off
-  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
+  - if docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
   # Socat should not be running?
-  - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
+  - if docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
   # No Custom Configuration (For this Round)
-  #- docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
+  #- if docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
   # Check Timezone
   - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'UTC'
 
@@ -104,11 +104,11 @@ script:
   - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'hhvm'
 
   # Xdebug should be off
-  - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
+  - if docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'; then false; else true; fi
   # Socat should not be running?
-  - docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
+  - if docker exec ${MY_DOCKER_NAME} ps auxw | grep 'socat'; then false; else true; fi
   # No Custom Configuration (For this Round)
-  #- docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
+  #- if docker exec ${MY_DOCKER_NAME} php --ini | grep -q 'custom.ini'; then false; else true; fi
   # Check Timezone
   - docker exec ${MY_DOCKER_NAME} hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'UTC'
 
