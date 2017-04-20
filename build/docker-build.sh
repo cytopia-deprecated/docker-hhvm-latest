@@ -58,25 +58,27 @@ run "docker build -t cytopia/${NAME} ${CWD}"
 ###
 
 docker run -d --rm --name my_tmp_${NAME} -t cytopia/${NAME}
-#PHP_MODULES="$( docker exec my_tmp_${NAME} hhvm --modules )"
+PHP_MODULES="$( docker exec my_tmp_${NAME} hhvm --info 2>/dev/null | grep -v '^hhvm\.' | grep -E '^([a-z0-9]+\.)' | sed 's/\..*//g' | sort -u )"
 PHP_VERSION="$( docker exec my_tmp_${NAME} hhvm --version | grep 'HipHop' )"
 docker stop "$(docker ps | grep "my_tmp_${NAME}" | awk '{print $1}')"
 
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed '/^\s*$/d' )"       # remove empty lines
-#PHP_MODULES="$( echo "${PHP_MODULES}" | tr '\n' ',' )"          # newlines to commas
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/],/]\n\n/g' )"   # extra line for [foo]
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/,\[/\n\n\[/g' )" # extra line for [foo]
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/,$//g' )"        # remove trailing comma
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/,/, /g' )"       # Add space to comma
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/]/]**/g' )"      # Markdown bold
-#PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/\[/**\[/g' )"    # Markdown bold
-#
-echo "${PHP_VERSION}"
-#
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed '/^\s*$/d' )"       # remove empty lines
+PHP_MODULES="$( echo "${PHP_MODULES}" | tr '\n' ',' )"          # newlines to commas
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/],/]\n\n/g' )"   # extra line for [foo]
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/,\[/\n\n\[/g' )" # extra line for [foo]
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/,$//g' )"        # remove trailing comma
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/,/, /g' )"       # Add space to comma
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/]/]**/g' )"      # Markdown bold
+PHP_MODULES="$( echo "${PHP_MODULES}" | sed 's/\[/**\[/g' )"    # Markdown bold
+
+echo "${PHP_MODULES}"
+
 sed -i'' '/##[[:space:]]Modules/q' "${CWD}/README.md"
 echo "" >> "${CWD}/README.md"
 echo "**[Version]**" >> "${CWD}/README.md"
 echo "" >> "${CWD}/README.md"
 echo "${PHP_VERSION}" >> "${CWD}/README.md"
-#echo "" >> "${CWD}/README.md"
-#echo "${PHP_MODULES}" >> "${CWD}/README.md"
+echo "" >> "${CWD}/README.md"
+echo "**[HHVM Modules]**" >> "${CWD}/README.md"
+echo "" >> "${CWD}/README.md"
+echo "${PHP_MODULES}" >> "${CWD}/README.md"

@@ -12,7 +12,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-04-19"
+	build-date="2017-04-20"
 
 
 ##
