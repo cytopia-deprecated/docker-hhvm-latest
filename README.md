@@ -20,6 +20,27 @@
 
 ## Options
 
+**Note:** HHVM comes with `PHP 5.6` and `PHP 7` support. This container enables `PHP 7` by default. If you want to use this container with `PHP 5.6` instead, you will have to mount a custom `*.ini` file to `/etc/php-custom.d` containing the following line:
+```ini
+hhvm.php7.all = false
+```
+
+**Example for PHP 5.6:**
+```shell
+# Your local directory to be mounted
+$ ls ./my-php-conf/
+php-5.ini
+
+# Contents of your local ini file
+$ cat ./my-php-conf/php-5.ini
+hhvm.php7.all = false
+
+# Mount your local config into the container
+$ docker run -i \
+    -v ./my-php-conf:/etc/php-custom.d \
+	-t cytopia/hhvm-latest
+```
+
 ### Environmental variables
 
 #### Required environmental variables
