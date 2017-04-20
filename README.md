@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-04-19</small>
+<small>**Latest build:** 2017-04-20</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
@@ -19,6 +19,27 @@
 ----
 
 ## Options
+
+**Note:** HHVM comes with `PHP 5.6` and `PHP 7` support. This container enables `PHP 7` by default. If you want to use this container with `PHP 5.6` instead, you will have to mount a custom `*.ini` file to `/etc/php-custom.d` containing the following line:
+```ini
+hhvm.php7.all = false
+```
+
+**Example for PHP 5.6:**
+```shell
+# Your local directory to be mounted
+$ ls ./my-php-conf/
+php-5.ini
+
+# Contents of your local ini file
+$ cat ./my-php-conf/php-5.ini
+hhvm.php7.all = false
+
+# Mount your local config into the container
+$ docker run -i \
+    -v ./my-php-conf:/etc/php-custom.d \
+	-t cytopia/hhvm-latest
+```
 
 ### Environmental variables
 
@@ -130,3 +151,7 @@ $ docker run -i \
 **[Version]**
 
 HipHop VM 3.19.1 (rel)
+
+**[HHVM Modules]**
+
+apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstring, memcache, memcached, mysqli, pcre, session, xdebug, zend, zlib
