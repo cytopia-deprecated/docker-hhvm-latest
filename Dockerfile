@@ -161,16 +161,27 @@ RUN \
 	\
 	( \
 		echo "; hhvm options"; \
+		echo "hhvm.php7.all = true"; \
+		\
 		echo "hhvm.server.type = fastcgi"; \
 		echo "hhvm.server.port = 9000"; \
 		echo "hhvm.server.user = ${MY_USER}"; \
-		echo "hhvm.php7.all = true"; \
+		echo "hhvm.server.implicit_flush = 1"; \
+		\
 		echo "hhvm.log.level = Warning"; \
 		echo "hhvm.log.access_log_default_format = \"%h %l %u %t	\\\"%r\\\" %>s %b\""; \
+		echo "hhvm.log.use_log_file = true"; \
 		echo "hhvm.log.file = ${MY_LOG_FILE_ERR}"; \
 		echo "hhvm.log.always_log_unhandled_exceptions = true"; \
 		echo "hhvm.log.runtime_error_reporting_level = 8191"; \
-		echo "hhvm.log.use_log_file = true"; \
+		\
+		echo "hhvm.debug.full_backtrace = true"; \
+		echo "hhvm.debug.server_stack_trace = true"; \
+		echo "hhvm.debug.server_error_message = true"; \
+		echo "hhvm.debug.translate_source = true"; \
+		\
+		echo "hhvm.error_handling.call_user_handler_on_fatals = 1"; \
+		\
 		echo "hhvm.mysql.typed_results = false"; \
 		echo "hhvm.repo.central.path = /var/cache/hhvm/hhvm.hhbc"; \
 	) > /etc/hhvm/server.ini && \
