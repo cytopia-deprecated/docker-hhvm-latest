@@ -198,6 +198,14 @@ RUN \
 
 
 ###
+### Configure PS1
+###
+RUN \
+	echo ". /etc/bash_profile" >> /home/${MY_USER}/.bashrc && \
+	echo ". /etc/bash_profile" >> /root/.bashrc
+
+
+###
 ### Bootstrap Scipts
 ###
 COPY ./scripts/docker-entrypoint.sh /
