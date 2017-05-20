@@ -5,11 +5,6 @@
 ###
 DEBUG_COMMANDS=0
 
-# If $MY_CFG_DIR_PHP_CUSTOM is mounted from the
-# host, all *.ini files from $MY_CFG_DIR_PHP_CUSTOM
-# will be copied to $PHP_CONF_DIR
-PHP_CONF_DIR="/etc/hhvm"
-
 # Default Xdebug remote port
 PHP_XDEBUG_DEFAULT_PORT="9000"
 
@@ -332,18 +327,6 @@ log "info" "Docker date set to: $(date)"
 
 
 ###
-### Custom PHP config
-###
-
-log "info" "Adding custom configuration files:"
-if [ -d "${MY_CFG_DIR_PHP_CUSTOM}" ]; then
-	run "find ${MY_CFG_DIR_PHP_CUSTOM} -type f -iname \"*.ini\" -exec echo \"Copying: {} to ${PHP_CONF_DIR}/\" \; -exec cp \"{}\" ${PHP_CONF_DIR}/ \;"
-	run "find ${PHP_CONF_DIR} -name '*.ini' -exec chmod 0644 {} \;"
-fi
-
-
-
-###
 ### PHP Xdebug
 ###
 
@@ -527,6 +510,24 @@ fi
 ### Nice shell prompt
 ###
 run "echo \". /etc/bash_profile\" >> /etc/bashrc"
+
+
+###
+### Build Custom PHP config files
+###
+if [ -d "${MY_CFG_DIR_PHP_CUSTOM}" ]; then
+	MY_FILES="$( find "${MY_CFG_DIR_PHP_CUSTOM}" -type f -iname '*.ini')"
+
+	MY_CUSTOM_CONFIG=""
+	if [ "${MY_FILES}" != "" ]; then
+		for f in ${MY_FILES}; do
+			MY_CUSTOM_CONFIG="${MY_CUSTOM_CONFIG} --config=${f}"
+		done
+	fi
+	log "info" "Custom configs: ${MY_CUSTOM_CONFIG}"
+	run "sed -i'' 's|^command=/usr/bin/hhvm.*|command=/usr/bin/hhvm --mode server --config=/etc/hhvm/server.ini --config=/etc/hhvm/php.ini ${MY_CUSTOM_CONFIG}|' /etc/supervisor/supervisord.conf"
+fi
+
 
 
 

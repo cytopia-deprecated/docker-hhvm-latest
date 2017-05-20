@@ -61,6 +61,8 @@ RUN apt-get update && apt-get -y install \
 	postfix-pcre \
 	socat \
 	tzdata \
+	dnsutils \
+	iputils-ping \
 	&& rm -r /var/lib/apt/lists/*
 
 

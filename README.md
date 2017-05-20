@@ -69,7 +69,7 @@ $ docker run -i \
 | Docker | Description |
 |--------|-------------|
 | /var/log/php | HHVM log dir |
-| /etc/php-custom.d | Custom user configuration files. Make sure to mount this folder to your host, where you have custom `*.ini` files. These files will then be copied to `/etc/hhvm/` during startup. |
+| /etc/php-custom.d | Custom user configuration files. Make sure to mount this folder to your host, where you have custom `*.ini` files. |
 | /var/mail | Mail mbox directory |
 
 ### Default ports

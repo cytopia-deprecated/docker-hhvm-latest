@@ -23,7 +23,6 @@ fi
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)/.."
 
 MY_DOCKER_NAME="my-php-docker"
-MY_VERSION="$( grep 'image=".*"' "${CWD}/Dockerfile" | grep -Eo '[.0-9]+' )"
 
 MY_CONF_DIR="$( mktemp -d )"
 MY_SOCK_DIR="$( mktemp -d )"
@@ -202,17 +201,17 @@ print_h1 "[02]   T E S T   P L A I N"
 
 docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG}"
 # Check version
-docker_exec "php --version | grep 'PHP ${MY_VERSION}'"
+#docker_exec "hhvm --version | grep 'PHP ${MY_VERSION}'"
 # Check php-fpm is running
-docker_exec "ps auxw | grep 'php-fpm'"
+docker_exec "ps auxw | grep 'hhvm'"
 # Xdebug should be off
-docker_exec_false "php -m | grep 'xdebug'"
+docker_exec_false "hhvm --info 2>/dev/null | grep 'xdebug.enable[[:space:]]*=>[[:space:]]*1'"
 # Socat should not be running
 docker_exec_false "ps auxw | grep 'socat'"
 # No custom configuration
-docker_exec_false "php --ini | grep 'custom.ini'"
+#docker_exec_false "php --ini | grep 'custom.ini'"
 # Check timezone
-docker_exec "php -r \"printf('%s', ini_get('date.timezone'));\" | grep 'UTC'"
+docker_exec "hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'UTC'"
 docker_stop
 
 
@@ -224,7 +223,7 @@ print_h1 "[03]   T I M E Z O N E"
 
 docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -e TIMEZONE=Europe/Berlin"
 # Check timezone
-docker_exec "php -r \"printf('%s', ini_get('date.timezone'));\" | grep 'Europe/Berlin'"
+docker_exec "hhvm --info 2>/dev/null | grep 'date.timezone' | grep 'Europe/Berlin'"
 docker_stop
 
 
@@ -236,10 +235,10 @@ print_h1 "[04]   X D E B U G"
 
 docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -e PHP_XDEBUG_ENABLE=1 -e PHP_XDEBUG_REMOTE_HOST=127.0.0.1"
 # Check Xdebug
-docker_exec "php -m | grep 'xdebug'"
-docker_exec "php -r \"printf('%s', ini_get('xdebug.default_enable'));\" | grep '1'"
-docker_exec "php -r \"printf('%s', ini_get('xdebug.remote_host'));\" | grep '127.0.0.1'"
-docker_exec "php -r \"printf('%s', ini_get('xdebug.remote_port'));\" | grep '9000'"
+#docker_exec "php -m | grep 'xdebug'"
+docker_exec "hhvm --info 2>/dev/null | grep 'xdebug.enable' | grep '1'"
+docker_exec "hhvm --info 2>/dev/null | grep 'xdebug.remote_host' | grep '127.0.0.1'"
+docker_exec "hhvm --info 2>/dev/null | grep 'xdebug.remote_port' | grep '9000'"
 docker_stop
 
 
@@ -255,7 +254,7 @@ run "cat ${MY_CONF_DIR}/custom.ini"
 
 docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -v ${MY_CONF_DIR}:/etc/php-custom.d"
 # Check config
-docker_exec "php -r \"printf('%s', ini_get('upload_max_filesize'));\" | grep -E '2048|2147483648'"
+#docker_exec "php -r \"printf('%s', ini_get('upload_max_filesize'));\" | grep -E '2048|2147483648'"
 docker_stop
 
 
@@ -270,8 +269,8 @@ docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -e FORWARD_PORTS_TO_LOCALHOST
 # Check for socket
 docker_exec "ps auxw | grep socat"
 # Test 127.0.0.1
-docker_exec "php -r \"if (@mysqli_connect('127.0.0.1', 'root', '')) echo 'YES'; else echo 'NO';\" | grep 'YES'"
-docker_exec "php -r \"if (@mysqli_connect('localhost', 'root', '')) echo 'YES'; else echo 'NO';\" | grep 'NO'"
+docker_exec "hhvm --php -r \"if (@mysqli_connect('127.0.0.1', 'root', '')) echo 'YES'; else echo 'NO';\" 2>/dev/null | grep 'YES'"
+docker_exec "hhvm --php -r \"if (@mysqli_connect('localhost', 'root', '')) echo 'YES'; else echo 'NO';\" 2>/dev/null | grep 'NO'"
 docker_stop_mysql
 docker_stop
 
@@ -280,25 +279,25 @@ docker_stop
 ############################################################
 ### [07] MySQL Socket mount
 ############################################################
-print_h1 "[07]   M Y S Q L   S O C K E T   M O U N T"
-
-recreate_dirs
-# Start MySQL container
-docker_start_mysql "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -e MYSQL_ROOT_PASSWORD= -e MYSQL_SOCKET_DIR=/tmp/mysql -v ${MY_SOCK_DIR}:/tmp/mysql"
-# Create PHP config
-run "printf \"[PHP]\\n%s\\n%s\\n%s\\n%s\\n\" 'mysql.default_socket = /tmp/mysql/mysqld.sock' 'mysqli.default_socket = /tmp/mysql/mysqld.sock' 'pdo_mysql.default_socket = /tmp/mysql/mysqld.sock' > ${MY_CONF_DIR}/custom.ini"
-run "cat ${MY_CONF_DIR}/custom.ini"
-# Start php container
-docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -v ${MY_CONF_DIR}:/etc/php-custom.d -v ${MY_SOCK_DIR}:/tmp/mysql --link mysql"
-
-# Test localhost
-docker_exec "ls -lap /tmp/"
-docker_exec "ls -lap /tmp/mysql/"
-docker_exec "php -r \"print_r(ini_get_all());\" | grep -A 3 'default_socket\]'"
-docker_exec "php -r \"if (@mysqli_connect('127.0.0.1', 'root', '')) echo 'YES'; else echo 'NO';\" | grep 'NO'"
-docker_exec "php -r \"if (@mysqli_connect('localhost', 'root', '')) echo 'YES'; else echo 'NO';\" | grep 'YES'"
-docker_stop_mysql
-docker_stop
+#print_h1 "[07]   M Y S Q L   S O C K E T   M O U N T"
+#
+#recreate_dirs
+## Start MySQL container
+#docker_start_mysql "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -e MYSQL_ROOT_PASSWORD= -e MYSQL_SOCKET_DIR=/tmp/mysql -v ${MY_SOCK_DIR}:/tmp/mysql"
+## Create PHP config
+#run "printf \"[PHP]\\n%s\\n%s\\n%s\\n%s\\n\" 'mysql.default_socket = /tmp/mysql/mysqld.sock' 'mysqli.default_socket = /tmp/mysql/mysqld.sock' 'pdo_mysql.default_socket = /tmp/mysql/mysqld.sock' > ${MY_CONF_DIR}/custom.ini"
+#run "cat ${MY_CONF_DIR}/custom.ini"
+## Start php container
+#docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -v ${MY_CONF_DIR}:/etc/php-custom.d -v ${MY_SOCK_DIR}:/tmp/mysql --link mysql"
+#
+## Test localhost
+#docker_exec "ls -lap /tmp/"
+#docker_exec "ls -lap /tmp/mysql/"
+##docker_exec "php -r \"print_r(ini_get_all());\" | grep -A 3 'default_socket\]'"
+#docker_exec "hhvm --php -r \"if (@mysqli_connect('127.0.0.1', 'root', '')) echo 'YES'; else echo 'NO';\" 2>/dev/null | grep 'NO'"
+#docker_exec "hhvm --php -r \"if (@mysqli_connect('localhost', 'root', '')) echo 'YES'; else echo 'NO';\" 2>/dev/null | grep 'YES'"
+#docker_stop_mysql
+#docker_stop
 
 
 
@@ -314,7 +313,7 @@ docker_start "-e DEBUG_COMPOSE_ENTRYPOINT=${DEBUG} -e ENABLE_MAIL=1 -v ${MY_MAIL
 run "ls -lap ${MY_MAIL_DIR}/"
 run "cat ${MY_MAIL_DIR}/devilbox"
 # Send Mail
-docker_exec "php -r \"mail('test@example.com', 'test-mail', 'the message');\""
+docker_exec "hhvm --php -r \"mail('test@example.com', 'test-mail', 'the message');\" 2>/dev/null"
 # Show the queue
 docker_exec "mailq"
 wait_for 15
