@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-05-21"
+	build-date="2017-05-22"
 
 
 ###
@@ -50,12 +50,16 @@ RUN apt-get update && apt-get -y install \
 	&& rm -r /var/lib/apt/lists/*
 
 # Add repository and keys
-RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449
-RUN add-apt-repository "deb http://dl.hhvm.com/ubuntu $(lsb_release -sc)${LTS_VERSION} main"
+RUN \
+	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 && \
+	add-apt-repository "deb http://dl.hhvm.com/ubuntu $(lsb_release -sc)${LTS_VERSION} main"
 
 # Install packages
-RUN apt-get update && apt-get -y install \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
 	hhvm \
+	hhvm-dev \
+	libtool \
+	git \
 	supervisor \
 	postfix \
 	postfix-pcre \
@@ -64,6 +68,19 @@ RUN apt-get update && apt-get -y install \
 	dnsutils \
 	iputils-ping \
 	&& rm -r /var/lib/apt/lists/*
+
+# Install MongoDB for HHVM
+RUN \
+	mkdir -p /usr/local/src && \
+	git clone https://github.com/mongodb/mongo-hhvm-driver.git /usr/local/src/mongo-hhvm-driver && \
+	cd /usr/local/src/mongo-hhvm-driver && \
+	git submodule sync && git submodule update --init --recursive && \
+	hphpize && \
+	cmake . && \
+	make configlib && \
+	make && \
+	make install && \
+	rm -rf /usr/local/src/mongo-hhvm-driver
 
 
 ###
@@ -85,7 +102,6 @@ RUN \
 	ln -s /usr/local/node/bin/* /usr/local/bin/ && \
 	rm -f /usr/local/src/node-${VERSION}-linux-x64.tar.xz
 
-
 RUN \
 	curl -sS https://getcomposer.org/installer | php && \
 	mv composer.phar /usr/local/bin/composer
@@ -97,6 +113,16 @@ RUN \
 	su - ${MY_USER} -c 'cd /usr/local/src/drush && git checkout 8.1.11' && \
 	su - ${MY_USER} -c 'cd /usr/local/src/drush && composer install --no-interaction --no-progress' && \
 	ln -s /usr/local/src/drush/drush /usr/local/bin/drush
+
+
+###
+### Cleanup
+###
+RUN apt-get update && apt-get -y remove \
+	hhvm-dev \
+	libtool \
+	&& apt-get autoremove -y \
+	&& rm -r /var/lib/apt/lists/*
 
 
 ###
@@ -193,6 +219,8 @@ RUN \
 		echo "session.save_handler = files"; \
 		echo "session.save_path = /var/lib/hhvm/sessions"; \
 		echo "session.gc_maxlifetime = 1440"; \
+		echo "hhvm.dynamic_extension_path =  $(dirname $( find /usr/lib/x86_64-linux-gnu/hhvm/extensions/ -name mongodb.so | head -1 ))"; \
+		echo "hhvm.dynamic_extensions[mongodb]=mongodb.so"; \
 	) > /etc/hhvm/php.ini
 # echo "hhvm.server.fix_path_info = true" >> /etc/hhvm/server.ini && \
 

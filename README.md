@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-05-21</small>
+<small>**Latest build:** 2017-05-22</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
@@ -190,7 +190,7 @@ HipHop VM 3.19.2 (rel)
 
 **[HHVM Modules]**
 
-apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstring, memcache, memcached, mysqli, pcre, session, xdebug, zend, zlib
+apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstring, memcache, memcached, mongodb, mysqli, pcre, session, xdebug, zend, zlib
 
 **[Tools]**
 
