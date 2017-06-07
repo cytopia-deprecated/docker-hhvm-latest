@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-05-22</small>
+<small>**Latest build:** 2017-06-07</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
@@ -186,7 +186,7 @@ $ docker run -d \
 
 **[Version]**
 
-HipHop VM 3.19.2 (rel)
+HipHop VM 3.20.1 (rel)
 
 **[HHVM Modules]**
 
@@ -200,5 +200,5 @@ apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstrin
 | drush          | 8.1.11 |
 | drupal-console | unavailable |
 | git            | 2.7.4 |
-| node           | 6.10.3 |
+| node           | 6.11.0 |
 | npm            | 3.10.10 |
