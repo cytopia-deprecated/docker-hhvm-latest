@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-06-07</small>
+<small>**Latest build:** 2017-06-17</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
@@ -62,6 +62,9 @@ $ docker run -i \
 | PHP_XDEBUG_ENABLE | bool | `0` | Enable Xdebug.<br/>Value: `0` or `1` |
 | PHP_XDEBUG_REMOTE_PORT | int | `9000` | The port on your Host (where you run the IDE/editor to which xdebug should connect.) |
 | PHP_XDEBUG_REMOTE_HOST | string | `` | The IP address of your Host (where you run the IDE/editor to which xdebug should connect).<br/>This is required if $PHP_DEBUG_ENABLE is turned on. |
+| MYSQL_BACKUP_USER | string | mds default | Username for mysql backups used for bundled [mysqldump-secure](https://mysqldump-secure.org) |
+| MYSQL_BACKUP_PASS | string | mds default | Password for mysql backups used for bundled [mysqldump-secure](https://mysqldump-secure.org) |
+| MYSQL_BACKUP_HOST | string | mds default | Hostname for mysql backups used for bundled [mysqldump-secure](https://mysqldump-secure.org) |
 
 ### Default mount points
 
@@ -186,7 +189,7 @@ $ docker run -d \
 
 **[Version]**
 
-HipHop VM 3.20.1 (rel)
+HipHop VM 3.20.2 (rel)
 
 **[HHVM Modules]**
 
@@ -196,9 +199,11 @@ apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstrin
 
 | tool           | version |
 |----------------|---------|
-| composer       | 1.4.2 |
-| drush          | 8.1.11 |
-| drupal-console | unavailable |
-| git            | 2.7.4 |
-| node           | 6.11.0 |
-| npm            | 3.10.10 |
+| [composer](https://getcomposer.org)    | 1.4.2 |
+| [drush](http://www.drush.org)          | 8.1.12 |
+| [drupal-console](https://drupalconsole.com) | 0.11.3 |
+| [git](https://git-scm.com)             | 2.7.4 |
+| [node](https://nodejs.org)             | 6.11.0 |
+| [npm](https://www.npmjs.com)           | 3.10.10 |
+| [mysqldump-secure](https://mysqldump-secure.org) | 0.16.3 |
+| [wp-cli](https://wp-cli.org)           | 1.2.1 |
