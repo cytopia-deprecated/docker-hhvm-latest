@@ -55,7 +55,10 @@ RUN \
 	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 && \
 	add-apt-repository "deb http://dl.hhvm.com/ubuntu $(lsb_release -sc)${LTS_VERSION} main" && \
 	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
-	add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main"
+	add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" && \
+	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 && \
+	echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-3.2.list
+
 
 # Install packages
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -92,6 +95,7 @@ RUN \
 RUN apt-get update && apt-get -y install \
 	mysql-client \
 	postgresql-client-9.6 \
+	mongodb-org-tools \
 	curl \
 	git \
 	&& rm -r /var/lib/apt/lists/*
