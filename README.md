@@ -203,11 +203,12 @@ apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstrin
 | [drush](http://www.drush.org)          | 8.1.12 |
 | [drupal-console](https://drupalconsole.com) | 0.11.3 |
 | [git](https://git-scm.com)             | 2.7.4 |
+| [mysqldump-secure](https://mysqldump-secure.org) | 0.16.3 |
 | [node](https://nodejs.org)             | 6.11.0 |
 | [npm](https://www.npmjs.com)           | 3.10.10 |
-| [mysqldump-secure](https://mysqldump-secure.org) | 0.16.3 |
+| [symfony installer](https://github.com/symfony/symfony-installer) | 10 |
 | [wp-cli](https://wp-cli.org)           | 1.2.1 |
 
 **[Misc Tools]**
 
-mongodump mongoexport mongofiles mongoimport mongooplog mongoperf mongorestore mongostat mongotop mysql mysqladmin mysqlanalyze mysqlcheck mysql_config_editor mysqldump mysqldumpslow mysql_embedded mysqlimport mysqloptimize mysqlpump mysqlrepair mysqlreport mysqlshow mysqlslap pg_basebackup pg_dump pg_dumpall pg_isready pg_receivewal pg_receivexlog pg_recvlogical pg_restore psql
+mongodump, mongoexport, mongofiles, mongoimport, mongooplog, mongoperf, mongorestore, mongostat, mongotop, mysql, mysqladmin, mysqlanalyze, mysqlcheck, mysql_config_editor, mysqldump, mysqldumpslow, mysql_embedded, mysqlimport, mysqloptimize, mysqlpump, mysqlrepair, mysqlreport, mysqlshow, mysqlslap, pg_basebackup, pg_dump, pg_dumpall, pg_isready, pg_receivewal, pg_receivexlog, pg_recvlogical, pg_restore, psql
