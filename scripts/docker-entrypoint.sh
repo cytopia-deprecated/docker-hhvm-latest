@@ -544,11 +544,6 @@ run "chown ${MY_USER}:${MY_GROUP} /etc/mysqldump-secure.conf"
 run "chown ${MY_USER}:${MY_GROUP} /etc/mysqldump-secure.cnf"
 
 
-###
-### Nice shell prompt
-###
-run "echo \". /etc/bash_profile\" >> /etc/bashrc"
-
 
 ###
 ### Build Custom PHP config files
