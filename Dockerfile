@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-06-07"
+	build-date="2017-06-20"
 
 
 ###
@@ -47,12 +47,18 @@ RUN \
 RUN apt-get update && apt-get -y install \
 	software-properties-common \
 	debian-archive-keyring \
+	wget \
 	&& rm -r /var/lib/apt/lists/*
 
 # Add repository and keys
 RUN \
 	apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 && \
-	add-apt-repository "deb http://dl.hhvm.com/ubuntu $(lsb_release -sc)${LTS_VERSION} main"
+	add-apt-repository "deb http://dl.hhvm.com/ubuntu $(lsb_release -sc)${LTS_VERSION} main" && \
+	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+	add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" && \
+	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
+	echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" > /etc/apt/sources.list.d/mongodb-org-3.4.list
+
 
 # Install packages
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -87,9 +93,11 @@ RUN \
 ### Install Tools
 ###
 RUN apt-get update && apt-get -y install \
+	mysql-client \
+	postgresql-client-9.6 \
+	mongodb-org-tools \
 	curl \
 	git \
-	wget \
 	&& rm -r /var/lib/apt/lists/*
 
 RUN \
@@ -104,15 +112,60 @@ RUN \
 
 RUN \
 	curl -sS https://getcomposer.org/installer | php && \
-	mv composer.phar /usr/local/bin/composer
+	mv composer.phar /usr/local/bin/composer && \
+	composer self-update
+
+RUN \
+	DRUSH_VERSION="$( curl -q https://api.github.com/repos/drush-ops/drush/releases 2>/dev/null | grep tag_name | grep -Eo '\"[0-9.]+\"' | head -1 | sed 's/\"//g' )" && \
+	mkdir -p /usr/local/src && \
+	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
+	su - ${MY_USER} -c 'git clone https://github.com/drush-ops/drush.git /usr/local/src/drush' && \
+	v="${DRUSH_VERSION}" su ${MY_USER} -p -c 'cd /usr/local/src/drush && git checkout ${v}' && \
+	su - ${MY_USER} -c 'cd /usr/local/src/drush && composer install --no-interaction --no-progress' && \
+	ln -s /usr/local/src/drush/drush /usr/local/bin/drush
+
+RUN \
+	composer create-project drupal/console /usr/local/src/drupal-console --no-dev && \
+	chmod +x /usr/local/src/drupal-console/bin/drupal && \
+	ln -s /usr/local/src/drupal-console/bin/drupal /usr/local/bin/drupal
+
+RUN \
+	composer create-project wp-cli/wp-cli /usr/local/src/wp-cli --no-dev && \
+	chmod +x /usr/local/src/wp-cli/bin/wp && \
+	ln -s /usr/local/src/wp-cli/bin/wp /usr/local/bin/wp
 
 RUN \
 	mkdir -p /usr/local/src && \
 	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
-	su - ${MY_USER} -c 'git clone https://github.com/drush-ops/drush.git /usr/local/src/drush' && \
-	su - ${MY_USER} -c 'cd /usr/local/src/drush && git checkout 8.1.11' && \
-	su - ${MY_USER} -c 'cd /usr/local/src/drush && composer install --no-interaction --no-progress' && \
-	ln -s /usr/local/src/drush/drush /usr/local/bin/drush
+	su - ${MY_USER} -c 'git clone https://github.com/cytopia/mysqldump-secure.git /usr/local/src/mysqldump-secure' && \
+	su - ${MY_USER} -c 'cd /usr/local/src/mysqldump-secure && git checkout $(git describe --abbrev=0 --tags)' && \
+	ln -s /usr/local/src/mysqldump-secure/bin/mysqldump-secure /usr/local/bin && \
+	cp /usr/local/src/mysqldump-secure/etc/mysqldump-secure.conf /etc && \
+	cp /usr/local/src/mysqldump-secure/etc/mysqldump-secure.cnf /etc && \
+	touch /var/log/mysqldump-secure.log && \
+	chown ${MY_USER}:${MY_GROUP} /etc/mysqldump-secure.* && \
+	chown ${MY_USER}:${MY_GROUP} /var/log/mysqldump-secure.log && \
+	chmod 0400 /etc/mysqldump-secure.conf && \
+	chmod 0400 /etc/mysqldump-secure.cnf && \
+	chmod 0644 /var/log/mysqldump-secure.log && \
+	sed -i'' 's/^DUMP_DIR=.*/DUMP_DIR="\/shared\/backups\/mysql"/g' /etc/mysqldump-secure.conf && \
+	sed -i'' 's/^DUMP_DIR_CHMOD=.*/DUMP_DIR_CHMOD="0755"/g' /etc/mysqldump-secure.conf && \
+	sed -i'' 's/^DUMP_FILE_CHMOD=.*/DUMP_FILE_CHMOD="0644"/g' /etc/mysqldump-secure.conf && \
+	sed -i'' 's/^LOG_CHMOD=.*/LOG_CHMOD="0644"/g' /etc/mysqldump-secure.conf && \
+	sed -i'' 's/^NAGIOS_LOG=.*/NAGIOS_LOG=0/g' /etc/mysqldump-secure.conf
+
+RUN \
+	curl -LsS https://symfony.com/installer -o /usr/local/bin/symfony && \
+	chmod a+x /usr/local/bin/symfony
+
+RUN \
+	mkdir -p /usr/local/src && \
+	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
+	su - ${MY_USER} -c 'git clone https://github.com/laravel/installer /usr/local/src/laravel-installer' && \
+	su - ${MY_USER} -c 'cd /usr/local/src/laravel-installer && git checkout $(git tag | sort -V | tail -1)' && \
+	su - ${MY_USER} -c 'cd /usr/local/src/laravel-installer && composer install' && \
+	ln -s /usr/local/src/laravel-installer/laravel /usr/local/bin/laravel && \
+	chmod +x /usr/local/bin/laravel
 
 
 ###
@@ -229,8 +282,17 @@ RUN \
 ### Configure PS1
 ###
 RUN \
-	echo ". /etc/bash_profile" >> /home/${MY_USER}/.bashrc && \
-	echo ". /etc/bash_profile" >> /root/.bashrc
+	( \
+		echo "if [ -f /etc/bashrc ]; then"; \
+		echo "    . /etc/bashrc"; \
+		echo "fi"; \
+	) | tee /home/${MY_USER}/.bashrc /root/.bashrc && \
+	( \
+		echo "if [ -f ~/.bashrc ]; then"; \
+		echo "    . ~/.bashrc"; \
+		echo "fi"; \
+	) | tee /home/${MY_USER}/.bash_profile /root/.bash_profile && \
+	echo ". /etc/bash_profile" | tee -a /etc/bash.bashrc
 
 
 ###
