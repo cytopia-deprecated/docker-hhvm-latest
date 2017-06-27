@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-06-20"
+	build-date="2017-06-27"
 
 
 ###
@@ -70,6 +70,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
 	postfix \
 	postfix-pcre \
 	socat \
+	netcat \
 	tzdata \
 	dnsutils \
 	iputils-ping \

@@ -1,12 +1,12 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-06-20</small>
+<small>**Latest build:** 2017-06-27</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
 [![cytopia/hhvm-latest](http://dockeri.co/image/cytopia/hhvm-latest)](https://hub.docker.com/r/cytopia/hhvm-latest/)
 
-**[php-fpm 5.4](https://github.com/cytopia/docker-php-fpm-5.4) | [php-fpm 5.5](https://github.com/cytopia/docker-php-fpm-5.5) | [php-fpm 5.6](https://github.com/cytopia/docker-php-fpm-5.6) | [php-fpm 7.0](https://github.com/cytopia/docker-php-fpm-7.0) | [php-fpm 7.1](https://github.com/cytopia/docker-php-fpm-7.1) | hhvm-latest**
+**[php-fpm 5.4](https://github.com/cytopia/docker-php-fpm-5.4) | [php-fpm 5.5](https://github.com/cytopia/docker-php-fpm-5.5) | [php-fpm 5.6](https://github.com/cytopia/docker-php-fpm-5.6) | [php-fpm 7.0](https://github.com/cytopia/docker-php-fpm-7.0) | [php-fpm 7.1](https://github.com/cytopia/docker-php-fpm-7.1) | [php-fpm 7.2](https://github.com/cytopia/docker-php-fpm-7.2) | hhvm-latest**
 
 ----
 
