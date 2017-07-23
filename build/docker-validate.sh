@@ -97,16 +97,16 @@ print_h1() {
 
 recreate_dirs() {
 	if [ -d "${MY_CONF_DIR}" ]; then
-		rm -rf "${MY_CONF_DIR}" || true
+		sudo rm -rf "${MY_CONF_DIR}" || true
 	fi
 	if [ -d "${MY_SOCK_DIR}" ]; then
-		rm -rf "${MY_SOCK_DIR}" || true
+		sudo rm -rf "${MY_SOCK_DIR}" || true
 	fi
 	if [ -d "${MY_MAIL_DIR}" ]; then
-		rm -rf "${MY_MAIL_DIR}" || true
+		sudo rm -rf "${MY_MAIL_DIR}" || true
 	fi
 	if [ -d "${MY_HTML_DIR}" ]; then
-		rm -rf "${MY_HTML_DIR}" || true
+		sudo rm -rf "${MY_HTML_DIR}" || true
 	fi
 	MY_CONF_DIR="$( mktemp -d )"
 	MY_SOCK_DIR="$( mktemp -d )"
@@ -121,6 +121,7 @@ recreate_dirs() {
 
 docker_start() {
 	_args="${1}"
+	docker_stop
 	run "docker run -d --rm ${_args} --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME}"
 	wait_for 10
 	if [ "${DOCKER_LOGS}" = "1" ]; then
@@ -140,7 +141,8 @@ docker_exec_false() {
 	run_if "docker exec ${MY_DOCKER_NAME} ${_args}" "false" "true"
 }
 docker_stop() {
-	run "docker stop $( docker_id )"
+	run "docker stop $( docker_id ) >/dev/null 2>&1 || true"
+	run "docker kill $( docker_id ) >/dev/null 2>&1 || true"
 }
 docker_logs() {
 	run "docker logs $( docker_id )"
@@ -150,6 +152,7 @@ docker_id() {
 }
 docker_start_mysql() {
 	_args="${1}"
+	docker_stop_mysql
 	run "docker run -d --rm ${_args} --name mysql cytopia/mysql-5.5"
 	wait_for 20
 	if [ "${DOCKER_LOGS}" = "1" ]; then
@@ -160,10 +163,12 @@ docker_start_mysql() {
 	fi
 }
 docker_stop_mysql() {
-	run "docker stop $( docker ps | grep 'mysql' | awk '{print $1}' )"
+	run "docker stop $( docker ps | grep 'mysql' | awk '{print $1}' ) >/dev/null 2>&1 || true"
+	run "docker kill $( docker ps | grep 'mysql' | awk '{print $1}' ) >/dev/null 2>&1 || true"
 }
 docker_start_httpd() {
 	_args="${1}"
+	docker_stop_httpd
 	run "docker run -d --rm ${_args} --name httpd cytopia/nginx-stable"
 	wait_for 20
 	if [ "${DOCKER_LOGS}" = "1" ]; then
@@ -174,7 +179,8 @@ docker_start_httpd() {
 	fi
 }
 docker_stop_httpd() {
-	run "docker stop $( docker ps | grep 'httpd' | awk '{print $1}' )"
+	run "docker stop $( docker ps | grep 'httpd' | awk '{print $1}' ) >/dev/null 2>&1 || true"
+	run "docker kill $( docker ps | grep 'httpd' | awk '{print $1}' ) >/dev/null 2>&1 || true"
 }
 
 
@@ -190,6 +196,7 @@ docker_stop_httpd() {
 print_h1 "[01]   B U I L D I N G"
 docker_stop >/dev/null 2>&1 || true
 docker_stop_mysql >/dev/null 2>&1 || true
+docker_stop_httpd >/dev/null 2>&1 || true
 run "docker build -t cytopia/${MY_DOCKER_NAME} ${CWD}/"
 
 
