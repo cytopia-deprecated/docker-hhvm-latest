@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-07-23"
+	build-date="2017-08-13"
 
 
 ###
@@ -125,10 +125,10 @@ RUN \
 	su - ${MY_USER} -c 'cd /usr/local/src/drush && composer install --no-interaction --no-progress' && \
 	ln -s /usr/local/src/drush/drush /usr/local/bin/drush
 
-RUN \
-	composer create-project drupal/console /usr/local/src/drupal-console --no-dev && \
-	chmod +x /usr/local/src/drupal-console/bin/drupal && \
-	ln -s /usr/local/src/drupal-console/bin/drupal /usr/local/bin/drupal
+#RUN \
+#	composer create-project drupal/console /usr/local/src/drupal-console --no-dev && \
+#	chmod +x /usr/local/src/drupal-console/bin/drupal && \
+#	ln -s /usr/local/src/drupal-console/bin/drupal /usr/local/bin/drupal
 
 RUN \
 	composer create-project wp-cli/wp-cli /usr/local/src/wp-cli --no-dev && \

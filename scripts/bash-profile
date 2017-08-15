@@ -22,7 +22,6 @@ echo
 echo "              | Available Tools  | Project website              |"
 echo "              |------------------|------------------------------|"
 echo "              | composer         | https://getcomposer.org      |"
-echo "              | drupal-console   | https://drupalconsole.com    |"
 echo "              | drush            | http://www.drush.org         |"
 echo "              | git              | https://git-scm.com          |"
 echo "              | laravel          | gh: laravel/installer        |"
