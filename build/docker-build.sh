@@ -45,12 +45,12 @@ DATE="$( date '+%Y-%m-%d' )"
 ### Build
 ###
 
+# Build Docker
+run "docker build -t cytopia/${NAME} ${CWD}"
+
 # Update build date
 run "sed -i'' 's/<small>\*\*Latest\sbuild.*/<small>**Latest build:** ${DATE}<\/small>/g' ${CWD}/README.md"
 run "sed -i'' 's/build-date=\".*\"/build-date=\"${DATE}\"/g' ${CWD}/Dockerfile"
-
-# Build Docker
-run "docker build -t cytopia/${NAME} ${CWD}"
 
 
 ###
@@ -60,6 +60,7 @@ run "docker build -t cytopia/${NAME} ${CWD}"
 docker run -d --rm --name my_tmp_${NAME} -t cytopia/${NAME}
 PHP_MODULES="$( docker exec my_tmp_${NAME} hhvm             --info 2>/dev/null | grep -v '^hhvm\.' | grep -E '^([a-z0-9]+\.)' | sed 's/\..*//g' | sort -u )"
 PHP_VERSION="$( docker exec my_tmp_${NAME} hhvm             --version | grep 'HipHop' )"
+BIN_ACI="$(     docker exec my_tmp_${NAME} sh -c 'cd /usr/local/src/awesome-ci && git branch 2>&1' | grep -Eo '[0-9.]+' | head -1 )"
 BIN_COMP="$(    docker exec my_tmp_${NAME} composer         --version 2>/dev/null | grep -Eo '[0-9.]+' | head -1 )"
 BIN_DRUSH="$(   docker exec my_tmp_${NAME} drush            --version 2>/dev/null | grep -Eo '[0-9.]+' | head -1 )"
 BIN_DRUSHC="unavailable"
@@ -99,6 +100,7 @@ echo "**[Tools]**"                        >> "${CWD}/README.md"
 echo ""                                   >> "${CWD}/README.md"
 echo "| tool           | version |"       >> "${CWD}/README.md"
 echo "|----------------|---------|"       >> "${CWD}/README.md"
+echo "| [awesome-ci](https://github.com/cytopia/awesome-ci)  | ${BIN_ACI} |"   >> "${CWD}/README.md"
 echo "| [composer](https://getcomposer.org)    | ${BIN_COMP} |"   >> "${CWD}/README.md"
 echo "| [drupal-console](https://drupalconsole.com) | ${BIN_DRUSHC} |" >> "${CWD}/README.md"
 echo "| [drush](http://www.drush.org)          | ${BIN_DRUSH} |"  >> "${CWD}/README.md"

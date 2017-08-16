@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-08-13</small>
+<small>**Latest build:** 2017-08-15</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
@@ -199,6 +199,7 @@ apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstrin
 
 | tool           | version |
 |----------------|---------|
+| [awesome-ci](https://github.com/cytopia/awesome-ci)  | 0.9 |
 | [composer](https://getcomposer.org)    | 1.5.1 |
 | [drupal-console](https://drupalconsole.com) | unavailable |
 | [drush](http://www.drush.org)          | 8.1.12 |

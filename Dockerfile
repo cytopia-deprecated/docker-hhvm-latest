@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-08-13"
+	build-date="2017-08-15"
 
 
 ###
@@ -59,7 +59,6 @@ RUN \
 	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
 	echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" > /etc/apt/sources.list.d/mongodb-org-3.4.list
 
-
 # Install packages
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install \
 	hhvm \
@@ -94,11 +93,39 @@ RUN \
 ### Install Tools
 ###
 RUN apt-get update && apt-get -y install \
-	mysql-client \
-	postgresql-client-9.6 \
-	mongodb-org-tools \
+	ack-grep \
+	aspell \
+	autoconf \
+	automake \
+	bash-completion \
+	bzip2 \
+	coreutils \
 	curl \
+	dos2unix \
+	file \
 	git \
+	git-svn \
+	hostname \
+	htop \
+	imagemagick \
+	locales \
+	mongodb-org-tools \
+	moreutils \
+	mysql-client \
+	net-tools \
+	postgresql-client-9.6 \
+	python-pip \
+	rubygems \
+	ruby-dev \
+	shellcheck \
+	silversearcher-ag \
+	subversion \
+	sudo \
+	tig \
+	vim \
+	w3m \
+	wget \
+	whois \
 	&& rm -r /var/lib/apt/lists/*
 
 RUN \
@@ -131,9 +158,10 @@ RUN \
 #	ln -s /usr/local/src/drupal-console/bin/drupal /usr/local/bin/drupal
 
 RUN \
-	composer create-project wp-cli/wp-cli /usr/local/src/wp-cli --no-dev && \
-	chmod +x /usr/local/src/wp-cli/bin/wp && \
-	ln -s /usr/local/src/wp-cli/bin/wp /usr/local/bin/wp
+	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+	mv wp-cli.phar /usr/local/bin/wp && \
+	chmod +x /usr/local/bin/wp && \
+	wp cli update
 
 RUN \
 	mkdir -p /usr/local/src && \
@@ -167,6 +195,32 @@ RUN \
 	su - ${MY_USER} -c 'cd /usr/local/src/laravel-installer && composer install' && \
 	ln -s /usr/local/src/laravel-installer/laravel /usr/local/bin/laravel && \
 	chmod +x /usr/local/bin/laravel
+
+#RUN \
+#	mkdir -p /usr/local/src && \
+#	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
+#	su - ${MY_USER} -c 'git clone https://github.com/phalcon/phalcon-devtools /usr/local/src/phalcon-devtools' && \
+#	su - ${MY_USER} -c 'cd /usr/local/src/phalcon-devtools && git checkout $(git tag | grep 'v3.0' | sort -V | tail -1)' && \
+#	su - ${MY_USER} -c 'cd /usr/local/src/phalcon-devtools && ./phalcon.sh' && \
+#	ln -s /usr/local/src/phalcon-devtools/phalcon.php /usr/local/bin/phalcon && \
+#	chmod +x /usr/local/bin/phalcon
+
+# Awesome-CI
+RUN \
+	mkdir -p /usr/local/src && \
+	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
+	su - ${MY_USER} -c 'git clone https://github.com/cytopia/awesome-ci.git /usr/local/src/awesome-ci' && \
+	su - ${MY_USER} -c 'cd /usr/local/src/awesome-ci && git checkout $(git describe --abbrev=0 --tags)' && \
+	su - ${MY_USER} -c 'cd /usr/local/src/awesome-ci && ./configure --prefix=/usr/local' && \
+	cd /usr/local/src/awesome-ci && make install
+# Awesome-CI requirements
+RUN \
+	gem install mdl && \
+	gem install scss_lint && \
+	npm install -g eslint && \
+	npm install -g jsonlint && \
+	npm install -g mdlint && \
+	npm install -g gulp
 
 
 ###
@@ -297,10 +351,46 @@ RUN \
 
 
 ###
+### Generate locals
+###
+RUN \
+	localedef -i de_CH -f UTF-8 de_CH.UTF-8 && \
+	localedef -i de_DE -f UTF-8 de_DE.UTF-8 && \
+	localedef -i de_LU -f UTF-8 de_LU.UTF-8 && \
+	\
+	localedef -i en_AG -f UTF-8 en_AG.UTF-8 && \
+	localedef -i en_AU -f UTF-8 en_AU.UTF-8 && \
+	localedef -i en_BW -f UTF-8 en_BW.UTF-8 && \
+	localedef -i en_CA -f UTF-8 en_CA.UTF-8 && \
+	localedef -i en_DK -f UTF-8 en_DK.UTF-8 && \
+	localedef -i en_GB -f UTF-8 en_GB.UTF-8 && \
+	localedef -i en_HK -f UTF-8 en_HK.UTF-8 && \
+	localedef -i en_IE -f UTF-8 en_IE.UTF-8 && \
+	localedef -i en_IN -f UTF-8 en_IN.UTF-8 && \
+	localedef -i en_NG -f UTF-8 en_NG.UTF-8 && \
+	localedef -i en_NZ -f UTF-8 en_NZ.UTF-8 && \
+	localedef -i en_PH -f UTF-8 en_PH.UTF-8 && \
+	localedef -i en_SG -f UTF-8 en_SG.UTF-8 && \
+	localedef -i en_US -f UTF-8 en_US.UTF-8 && \
+	localedef -i en_ZA -f UTF-8 en_ZA.UTF-8 && \
+	localedef -i en_ZM -f UTF-8 en_ZM.UTF-8 && \
+	localedef -i en_ZW -f UTF-8 en_ZW.UTF-8 && \
+	\
+	localedef -i ru_RU -f UTF-8 ru_RU.UTF-8 && \
+	localedef -i ru_UA -f UTF-8 ru_UA.UTF-8 && \
+	\
+	localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 && \
+	localedef -i zh_HK -f UTF-8 zh_HK.UTF-8 && \
+	localedef -i zh_SG -f UTF-8 zh_SG.UTF-8 && \
+	localedef -i zh_TW -f UTF-8 zh_TW.UTF-8
+
+
+###
 ### Bootstrap Scipts
 ###
 COPY ./scripts/docker-entrypoint.sh /
 COPY ./scripts/bash-profile /etc/bash_profile
+COPY ./scripts/sudo-devilbox /etc/sudoers.d/devilbox
 
 
 ###
