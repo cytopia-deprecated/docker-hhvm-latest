@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-08-15</small>
+<small>**Latest build:** 2017-08-17</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
