@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-08-17"
+	build-date="2017-08-27"
 
 
 ###
@@ -128,6 +128,7 @@ RUN apt-get update && apt-get -y install \
 	whois \
 	&& rm -r /var/lib/apt/lists/*
 
+# Node / NPM
 RUN \
 	mkdir -p /usr/local/src && \
 	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
@@ -138,11 +139,13 @@ RUN \
 	ln -s /usr/local/node/bin/* /usr/local/bin/ && \
 	rm -f /usr/local/src/node-${VERSION}-linux-x64.tar.xz
 
+# Composer
 RUN \
 	curl -sS https://getcomposer.org/installer | php && \
 	mv composer.phar /usr/local/bin/composer && \
 	composer self-update
 
+# Drush
 RUN \
 	DRUSH_VERSION="$( curl -q https://api.github.com/repos/drush-ops/drush/releases 2>/dev/null | grep tag_name | grep -Eo '\"[0-9.]+\"' | head -1 | sed 's/\"//g' )" && \
 	mkdir -p /usr/local/src && \
@@ -152,17 +155,20 @@ RUN \
 	su - ${MY_USER} -c 'cd /usr/local/src/drush && composer install --no-interaction --no-progress' && \
 	ln -s /usr/local/src/drush/drush /usr/local/bin/drush
 
+# Drupal Console
 #RUN \
 #	composer create-project drupal/console /usr/local/src/drupal-console --no-dev && \
 #	chmod +x /usr/local/src/drupal-console/bin/drupal && \
 #	ln -s /usr/local/src/drupal-console/bin/drupal /usr/local/bin/drupal
 
+# WP-CLI
 RUN \
 	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
 	mv wp-cli.phar /usr/local/bin/wp && \
 	chmod +x /usr/local/bin/wp && \
 	wp cli update
 
+# Mysqldump-secure
 RUN \
 	mkdir -p /usr/local/src && \
 	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
@@ -183,10 +189,12 @@ RUN \
 	sed -i'' 's/^LOG_CHMOD=.*/LOG_CHMOD="0644"/g' /etc/mysqldump-secure.conf && \
 	sed -i'' 's/^NAGIOS_LOG=.*/NAGIOS_LOG=0/g' /etc/mysqldump-secure.conf
 
+# Symfony CLI
 RUN \
 	curl -LsS https://symfony.com/installer -o /usr/local/bin/symfony && \
 	chmod a+x /usr/local/bin/symfony
 
+# Laravel CLI
 RUN \
 	mkdir -p /usr/local/src && \
 	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
@@ -196,6 +204,7 @@ RUN \
 	ln -s /usr/local/src/laravel-installer/laravel /usr/local/bin/laravel && \
 	chmod +x /usr/local/bin/laravel
 
+# Phalcon DevTools
 #RUN \
 #	mkdir -p /usr/local/src && \
 #	chown ${MY_USER}:${MY_GROUP} /usr/local/src && \
@@ -221,6 +230,11 @@ RUN \
 	npm install -g jsonlint && \
 	npm install -g mdlint && \
 	npm install -g gulp && \
+	ln -sf /usr/local/node/bin/* /usr/local/bin/
+
+# Webpack
+RUN \
+	npm install -g --save-dev webpack && \
 	ln -sf /usr/local/node/bin/* /usr/local/bin/
 
 
