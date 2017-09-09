@@ -1,6 +1,6 @@
 # HHVM latest Docker
 
-<small>**Latest build:** 2017-08-27</small>
+<small>**Latest build:** 2017-09-09</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-hhvm-latest.svg?branch=master)](https://travis-ci.org/cytopia/docker-hhvm-latest) [![](https://images.microbadger.com/badges/version/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/image/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest") [![](https://images.microbadger.com/badges/license/cytopia/hhvm-latest.svg)](https://microbadger.com/images/cytopia/hhvm-latest "hhvm-latest")
 
@@ -204,13 +204,13 @@ apc, assert, bcmath, brotli, curl, date, highlight, hphp, imagick, intl, mbstrin
 | [drupal-console](https://drupalconsole.com) | unavailable |
 | [drush](http://www.drush.org)          | 8.1.13 |
 | [git](https://git-scm.com)             | 2.7.4 |
-| [laravel installer](https://github.com/laravel/installer)     | 1.3.7 |
+| [laravel installer](https://github.com/laravel/installer)     | 1.4.1 |
 | [mysqldump-secure](https://mysqldump-secure.org) | 0.16.3 |
-| [node](https://nodejs.org)             | 6.11.2 |
+| [node](https://nodejs.org)             | 6.11.3 |
 | [npm](https://www.npmjs.com)           | 3.10.10 |
 | [phalcon-devtools](https://github.com/phalcon/phalcon-devtools)   | unavailable |
 | [symfony installer](https://github.com/symfony/symfony-installer) | 10 |
-| [Webpack](https://github.com/webpack/webpack)                     | 3.5.5 |
+| [Webpack](https://github.com/webpack/webpack)                     | 3.5.6 |
 | [wp-cli](https://wp-cli.org)           | 1.3.0 |
 
 **[Misc Tools]**

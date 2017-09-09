@@ -13,7 +13,7 @@ LABEL \
 	image="hhvm-latest" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-08-27"
+	build-date="2017-09-09"
 
 
 ###
@@ -229,13 +229,16 @@ RUN \
 	npm install -g eslint && \
 	npm install -g jsonlint && \
 	npm install -g mdlint && \
-	npm install -g gulp && \
-	ln -sf /usr/local/node/bin/* /usr/local/bin/
+	npm install -g gulp
+
+# Grunt
+RUN \
+	npm install -g grunt && \
+	npm install -g grunt-cli
 
 # Webpack
 RUN \
-	npm install -g --save-dev webpack && \
-	ln -sf /usr/local/node/bin/* /usr/local/bin/
+	npm install -g --save-dev webpack
 
 
 ###
@@ -349,30 +352,18 @@ RUN \
 
 
 ###
-### Configure PS1
+### Configure Bash
 ###
 RUN \
 	( \
-		echo "if [ -f /etc/bashrc ]; then"; \
-		echo "    . /etc/bashrc"; \
-		echo "fi"; \
+		echo ". /etc/profile"; \
 		echo "if [ -d /etc/bashrc-devilbox.d/ ]; then"; \
 		echo "    for f in /etc/bashrc-devilbox.d/*.sh ; do"; \
-		echo "        .\${f}"; \
+		echo "        . \${f}"; \
 		echo "    done"; \
-		echo "fi";\
-	) | tee /home/${MY_USER}/.bashrc /root/.bashrc && \
-	( \
-		echo "if [ -f ~/.bashrc ]; then"; \
-		echo "    . ~/.bashrc"; \
 		echo "fi"; \
-		echo "if [ -d /etc/bashrc-devilbox.d/ ]; then"; \
-		echo "    for f in /etc/bashrc-devilbox.d/*.sh ; do"; \
-		echo "        .\${f}"; \
-		echo "    done"; \
-		echo "fi";\
-	) | tee /home/${MY_USER}/.bash_profile /root/.bash_profile && \
-	echo ". /etc/bash_profile" | tee -a /etc/bash.bashrc
+	) | tee -a /home/${MY_USER}/.bashrc /root/.bashrc && \
+	chown ${MY_USER}:${MY_GROUP} /home/${MY_USER}/.bashrc
 
 
 ###
@@ -414,7 +405,7 @@ RUN \
 ### Bootstrap Scipts
 ###
 COPY ./scripts/docker-entrypoint.sh /
-COPY ./scripts/bash-profile /etc/bash_profile
+COPY ./scripts/bash-profile /etc/profile.d/devilbox.sh
 COPY ./scripts/sudo-devilbox /etc/sudoers.d/devilbox
 
 
